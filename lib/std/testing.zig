@@ -260,6 +260,100 @@ test "expectEqual null" {
     try expectEqual(a, b);
 }
 
+pub inline fn expectLess(lhs: anytype, rhs: anytype) !void {
+    const T = @TypeOf(lhs, rhs);
+    return expectLessInner(T, lhs, rhs);
+}
+
+fn expectLessInner(comptime T: type, lhs: T, rhs: T) !void {
+    switch (@typeInfo(T)) {
+        .int, .float, .comptime_int, .comptime_float => {
+            if (!(lhs < rhs)) {
+                print("expected {} < {}\n", .{ lhs, rhs });
+                return error.TestExpectedLess;
+            }
+        },
+        else => @compileError("expectLess only supports numeric types"),
+    }
+}
+
+pub inline fn expectGreater(lhs: anytype, rhs: anytype) !void {
+    const T = @TypeOf(lhs, rhs);
+    return expectGreaterInner(T, lhs, rhs);
+}
+
+fn expectGreaterInner(comptime T: type, lhs: T, rhs: T) !void {
+    switch (@typeInfo(T)) {
+        .int, .float, .comptime_int, .comptime_float => {
+            if (!(lhs > rhs)) {
+                print("expected {} > {}\n", .{ lhs, rhs });
+                return error.TestExpectedGreater;
+            }
+        },
+        else => @compileError("expectGreater only supports numeric types"),
+    }
+}
+
+pub inline fn expectLessEqual(lhs: anytype, rhs: anytype) !void {
+    const T = @TypeOf(lhs, rhs);
+    return expectLessEqualInner(T, lhs, rhs);
+}
+
+fn expectLessEqualInner(comptime T: type, lhs: T, rhs: T) !void {
+    switch (@typeInfo(T)) {
+        .int, .float, .comptime_int, .comptime_float => {
+            if (!(lhs <= rhs)) {
+                print("expected {} <= {}\n", .{ lhs, rhs });
+                return error.TestExpectedLessEqual;
+            }
+        },
+        else => @compileError("expectLessEqual only supports numeric types"),
+    }
+}
+
+pub inline fn expectGreaterEqual(lhs: anytype, rhs: anytype) !void {
+    const T = @TypeOf(lhs, rhs);
+    return expectGreaterEqualInner(T, lhs, rhs);
+}
+
+fn expectGreaterEqualInner(comptime T: type, lhs: T, rhs: T) !void {
+    switch (@typeInfo(T)) {
+        .int, .float, .comptime_int, .comptime_float => {
+            if (!(lhs >= rhs)) {
+                print("expected {} >= {}\n", .{ lhs, rhs });
+                return error.TestExpectedGreaterEqual;
+            }
+        },
+        else => @compileError("expectGreaterEqual only supports numeric types"),
+    }
+}
+
+test "expectLess" {
+    try expectLess(1, 2);
+    try expectLess(-1, 0);
+    try expectLess(0.5, 1.0);
+}
+
+test "expectGreater" {
+    try expectGreater(2, 1);
+    try expectGreater(0, -1);
+    try expectGreater(1.0, 0.5);
+}
+
+test "expectLessEqual" {
+    try expectLessEqual(1, 2);
+    try expectLessEqual(2, 2);
+    try expectLessEqual(0.5, 1.0);
+    try expectLessEqual(1.0, 1.0);
+}
+
+test "expectGreaterEqual" {
+    try expectGreaterEqual(2, 1);
+    try expectGreaterEqual(2, 2);
+    try expectGreaterEqual(1.0, 0.5);
+    try expectGreaterEqual(1.0, 1.0);
+}
+
 /// This function is intended to be used only in tests. When the formatted result of the template
 /// and its arguments does not equal the expected text, it prints diagnostics to stderr to show how
 /// they are not equal, then returns an error. It depends on `expectEqualStrings` for printing
